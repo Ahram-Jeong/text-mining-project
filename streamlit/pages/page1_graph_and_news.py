@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from datetime import datetime
 import requests as req
 from bs4 import BeautifulSoup as bs
 
@@ -10,9 +9,9 @@ from bs4 import BeautifulSoup as bs
 final_data = pd.read_csv("data/doc_tone_base_rate.csv")
 df = pd.DataFrame(final_data)
 
-st.title("🔎 의사록 어조에 따른 금리 예측")
+st.title("의사록 어조에 따른 금리 예측")
 with st.sidebar :
-    ds = st.date_input("조회 시작일 선택", pd.to_datetime("2005-06-06"))
+    ds = st.date_input("조회 시작일 선택", pd.to_datetime("2005-06-09"))
     de = st.date_input("조회 종료일 선택", pd.to_datetime("2017-01-13"))
 
 # date 컬럼 값을 datetime 값으로 변환
@@ -24,15 +23,15 @@ date_df = df[(df["date"] >= pd.Timestamp(ds)) & (df["date"] <= pd.Timestamp(de))
 graph1 = plt.figure(figsize = (10, 7))
 plt.rc("font", family = "NanumGothic", size = 13)
 plt.rcParams["axes.unicode_minus"] = False
-plt.title("의사록 어조와 기준금리의 변화 추이")
-ax1 = date_df.doc_tone.plot(grid = True, label = "의사록 어조")
-ax2 = date_df.baserate.plot(grid = True, label = "기준금리", secondary_y = True)
+st.subheader("📈의사록 어조와 기준금리의 변화 추이")
+ax1 = date_df.doc_tone.plot(label = "Doc tone")
+ax2 = date_df.baserate.plot(label = "Base Rate", secondary_y = True)
 # 범례 표시
 lines, labels = ax1.get_legend_handles_labels()
 lines2, labels2 = ax2.get_legend_handles_labels()
 ax1.legend(lines + lines2, labels + labels2, loc = "upper right")
 # y축 limit
-ax1.set_ylim(-1.5, 0)
+ax1.set_ylim(-1, 0)
 st.pyplot(graph1)
 
 # 사이드 바 날짜 선택에 맞춰 DataFrame 출력
@@ -41,10 +40,10 @@ st.dataframe(date_df, use_container_width = True)
 # graph 2
 # 산점도, 추세선
 graph2 = plt.figure()
-plt.title("의사록 어조에 따른 기준금리 분포도")
+st.subheader("📉의사록 어조에 따른 기준금리 분포도")
 sns.regplot(x = "doc_tone", y = "baserate", data = date_df)
-plt.xlabel("의사록 어조")
-plt.ylabel("기준금리")
+plt.xlabel("Doc tone")
+plt.ylabel("Base Rate")
 st.pyplot(graph2)
 
 # 선택 날짜 네이버 뉴스 검색

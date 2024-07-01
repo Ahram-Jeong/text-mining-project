@@ -12,7 +12,7 @@ pos_dict = pos_dict.rename(columns={"Unnamed: 0" : "positive_word"})
 # 그래프 한글 폰트 설정
 plt.rcParams["font.family"] = "NanumGothic"
 
-st.title("📖 극성 사전 추출 결과")
+st.title("극성 사전 추출 결과")
 
 # 긍정 카운트가 가장 큰 상위 10개 단어 추출
 pos_word1 = pos_dict.sort_values("Up", ascending = False).head(10)
