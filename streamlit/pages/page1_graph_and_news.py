@@ -27,12 +27,18 @@ plt.rcParams["axes.unicode_minus"] = False
 plt.title("의사록 어조와 기준금리의 변화 추이")
 ax1 = date_df.doc_tone.plot(grid = True, label = "의사록 어조")
 ax2 = date_df.baserate.plot(grid = True, label = "기준금리", secondary_y = True)
+# 범례 표시
+lines, labels = ax1.get_legend_handles_labels()
+lines2, labels2 = ax2.get_legend_handles_labels()
+ax1.legend(lines + lines2, labels + labels2, loc = "upper right")
+# y축 limit
 ax1.set_ylim(-1.5, 0)
 st.pyplot(graph1)
 
 # 사이드 바 날짜 선택에 맞춰 DataFrame 출력
 st.dataframe(date_df, use_container_width = True)
 
+# graph 2
 # 산점도, 추세선
 graph2 = plt.figure()
 plt.title("의사록 어조에 따른 기준금리 분포도")
@@ -41,6 +47,7 @@ plt.xlabel("의사록 어조")
 plt.ylabel("기준금리")
 st.pyplot(graph2)
 
+# 선택 날짜 네이버 뉴스 검색
 def get_news_item(url) :
     res = req.get(url)
     soup = bs(res.text, "html.parser")
@@ -72,8 +79,8 @@ def get_news(ds, de) :
         page += 1
     return pd.DataFrame(columns = ["date", "title", "media", "content"], data = result)
 st.title("네이버 뉴스")
-st.write(f"{ds.strftime('%Y-%m-%d')}부터 {de.strftime('%Y-%m-%d')}까지의 [금리] 네이버 뉴스 '관련도순' 결과입니다.")
+st.write(f"{ds.strftime('%Y-%m-%d')}부터 {de.strftime('%Y-%m-%d')}까지의 [금리] 네이버 뉴스 '관련도순' 검색 결과입니다.")
 
-if ds and de:
+if ds and de :
     df_news = get_news(ds.strftime("%Y%m%d"), de.strftime("%Y%m%d"))
     st.dataframe(df_news)
