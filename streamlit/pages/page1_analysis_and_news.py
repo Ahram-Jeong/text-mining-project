@@ -5,46 +5,61 @@ import seaborn as sns
 import requests as req
 from bs4 import BeautifulSoup as bs
 
-# 데이터 불러오기
+# --- data
 final_data = pd.read_csv("data/doc_tone_base_rate.csv")
 df = pd.DataFrame(final_data)
+# 폰트 설정
+plt.rc("font", family = "NanumGothic", size = 13)
+plt.rcParams["axes.unicode_minus"] = False
 
-st.title("의사록 어조에 따른 금리 예측")
+# --- page
+st.set_page_config(page_title = "Analysis | Jeong Ahram")
+
+# --- sidebar
 with st.sidebar :
-    ds = st.date_input("조회 시작일 선택", pd.to_datetime("2005-06-09"))
-    de = st.date_input("조회 종료일 선택", pd.to_datetime("2017-01-13"))
+    ds = st.date_input("💡 조회 시작일", pd.to_datetime("2005-06-09"))
+    de = st.date_input("💡 조회 종료일", pd.to_datetime("2017-01-13"))
+
+# --- body
+st.subheader("한국은행 금융통화위원회 의사록 어조에 따른 금리 예측")
+st.info("✅ 사이드 바의 날짜를 선택하여 조회 가능")
 
 # date 컬럼 값을 datetime 값으로 변환
 df["date"] = pd.to_datetime(df["date"])
+
 # date_input에 따른 결과 DataFrame 새로 생성
 date_df = df[(df["date"] >= pd.Timestamp(ds)) & (df["date"] <= pd.Timestamp(de))]
 
-# graph 1
-graph1 = plt.figure(figsize = (10, 7))
-plt.rc("font", family = "NanumGothic", size = 13)
-plt.rcParams["axes.unicode_minus"] = False
-st.subheader("📈의사록 어조와 기준금리의 변화 추이")
-ax1 = date_df.doc_tone.plot(label = "Doc tone")
-ax2 = date_df.baserate.plot(label = "Base Rate", secondary_y = True)
-# 범례 표시
-lines, labels = ax1.get_legend_handles_labels()
-lines2, labels2 = ax2.get_legend_handles_labels()
-ax1.legend(lines + lines2, labels + labels2, loc = "upper right")
-# y축 limit
-ax1.set_ylim(-1, 0)
-st.pyplot(graph1)
+# tabs
+tabs = st.tabs(["lineplot", "regplot"])
+
+with tabs[0] :
+    # graph 1
+    st.subheader("📈의사록 어조와 기준금리의 변화 추이")
+    graph1 = plt.figure(figsize = (10, 7))
+    ax1 = date_df.doc_tone.plot(label = "Doc tone")
+    ax2 = date_df.baserate.plot(label = "Base Rate", secondary_y = True)
+    # 범례 표시
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines + lines2, labels + labels2, loc = "upper right")
+    # y축 limit
+    ax1.set_ylim(-1, 0)
+    st.pyplot(graph1)
+
+with tabs[1] :
+    # graph 2
+    # 산점도, 추세선
+    graph2 = plt.figure()
+    st.subheader("📉의사록 어조에 따른 기준금리 분포와 상관 관계")
+    sns.regplot(x="doc_tone", y="baserate", data=date_df)
+    plt.xlabel("Doc tone")
+    plt.ylabel("Base Rate")
+    st.pyplot(graph2)
 
 # 사이드 바 날짜 선택에 맞춰 DataFrame 출력
 st.dataframe(date_df, use_container_width = True)
-
-# graph 2
-# 산점도, 추세선
-graph2 = plt.figure()
-st.subheader("📉의사록 어조에 따른 기준금리 분포도")
-sns.regplot(x = "doc_tone", y = "baserate", data = date_df)
-plt.xlabel("Doc tone")
-plt.ylabel("Base Rate")
-st.pyplot(graph2)
+st.write("---")
 
 # 선택 날짜 네이버 뉴스 검색
 def get_news_item(url) :
@@ -78,7 +93,7 @@ def get_news(ds, de) :
         page += 1
     return pd.DataFrame(columns = ["date", "title", "media", "content"], data = result)
 st.title("네이버 뉴스")
-st.write(f"{ds.strftime('%Y-%m-%d')}부터 {de.strftime('%Y-%m-%d')}까지의 [금리] 네이버 뉴스 '관련도순' 검색 결과입니다.")
+st.write(f"{ds.strftime('%Y-%m-%d')}부터 {de.strftime('%Y-%m-%d')}까지의 **[금리]** 네이버 뉴스 **'관련도순'** 검색 결과입니다.")
 
 if ds and de :
     df_news = get_news(ds.strftime("%Y%m%d"), de.strftime("%Y%m%d"))
